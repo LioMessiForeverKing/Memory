@@ -20,6 +20,8 @@ Current Focus: Hopfield Networks
 
 **Current status:** Basic Hopfield implementation working. Next: Bloom filters, then cache simulators.
 
+**Learning Journal:** [Hopfield Networks](journal/hopfield_networks.md) - Detailed notes on experiments, failures, and biology connections
+
 Project Structure
 -----------------
 
