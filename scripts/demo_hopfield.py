@@ -14,9 +14,9 @@ def hamming_distance(a: np.ndarray, b: np.ndarray) -> int:
 
 def main() -> None:
 	rng = np.random.default_rng(42)
-	num_units = 8000
-	num_patterns = 600
-	noise_flips = 1200
+	num_units = 4000
+	num_patterns = 390
+	noise_flips = 1460
 
 	patterns = make_random_patterns(num_patterns, num_units, rng)
 	net = HopfieldNetwork(num_units)
