@@ -1,71 +1,120 @@
 # Hopfield Networks: Learning Journal
 
-## What I Built
-A simple Hopfield network implementation that stores patterns as "attractors" in an energy landscape. Give it a noisy pattern, and it iteratively updates until it settles into the closest stored memory.
-
-## Key Discoveries
-
-### 1. Capacity Limits Are Real (Not Bugs)
-**Experiment:** Stored 900 patterns in 8000 units, added 800 bits of noise
-**Result:** Started with 800 wrong bits, only recovered to 18 wrong bits—not perfect recall
-**Why:** Theoretical capacity is ~0.138 × units = ~1104 patterns for random data. I was close to the limit.
-
-**Biology connection:** This mirrors how biological memory works. The hippocampus has finite capacity—store too many similar memories and they interfere. Alzheimer's might be like hitting capacity limits where memories start blending together.
-
-### 2. Graceful Degradation (Not Binary Failure)
-**What happened:** Even when recall "failed," it got much closer (800→18 errors). The network didn't just give up—it found a "close enough" solution.
-
-**Biology connection:** Human memory works this way too. We don't remember things perfectly, but we often get "close enough" for practical purposes. This might explain why we can recognize faces even when details are fuzzy.
-
-### 3. Energy Landscapes Create Natural Attractors
-**How it works:** Each stored pattern creates a "valley" in an energy landscape. During recall, the network "rolls downhill" until it hits a stable point.
-
-**Biology connection:** This is eerily similar to how neural networks in the brain might work. Memories could be stable states that the brain naturally settles into. Sleep might be like "rolling downhill" to consolidate memories into deeper valleys.
-
-### 4. Pattern Structure Matters Enormously
-**Theory:** Random patterns are worst-case for capacity. Orthogonal patterns can store N patterns perfectly. Sparse patterns (few active neurons) store much better.
-
-**Biology connection:** The brain uses "pattern separation" (like in the dentate gyrus) to make memories more orthogonal. This is why similar experiences don't always interfere—the brain actively tries to make them distinct.
-
-### 5. The 8,000 Comma Bug
-**What happened:** Typed `num_units = 8,000` instead of `8000`
-**Result:** Python created a tuple `(8, 0)` instead of integer `8000`
-**Lesson:** Small syntax errors can break everything. Always check your data types!
-
-## Experiments to Try Next
-
-### Capacity Sweep
-- Fix units at 1000, vary patterns from 10 to 200
-- Plot error rate vs number of stored patterns
-- Find the "knee" where recall starts degrading
-
-### Noise Tolerance
-- Fix patterns at safe capacity, vary noise from 0% to 50%
-- See how much corruption the system can handle
-- Compare to human memory robustness
-
-### Pattern Structure Comparison
-- Random patterns vs orthogonal patterns vs sparse patterns
-- Measure capacity and error rates for each
-- Connect to biological pattern separation
-
-### Update Dynamics
-- Synchronous (all units update together) vs asynchronous (one at a time)
-- Different convergence paths and final states
-- More biologically realistic?
-
-## Questions This Raises
-
-1. **Why do biological systems have capacity limits?** Is it a bug or a feature?
-2. **How does the brain avoid interference?** Pattern separation, modularity, forgetting?
-3. **What's the relationship between energy and consciousness?** Stable states = awareness?
-4. **Can we design better artificial memories?** Learning from biological constraints?
-
-## Next Steps
-- Implement Bloom filters (probabilistic membership)
-- Add cache simulators (LRU/LFU under resource constraints)
-- Build spaced repetition scheduler (human learning optimization)
+## Why I Built This
+I wanted a hands-on way to understand memory systems: how recall works from noisy cues, why capacity limits exist, and how interference shows up. A Hopfield network is a minimal model that demonstrates all of this in a concrete, testable way.
 
 ---
 
-*This journal entry captures what I learned from my first Hopfield experiments. Each algorithm reveals different aspects of how memory systems work—and fail.*
+## Experiment 1: Small, Clean Case (64 units)
+- Units (D): 64
+- Stored patterns (N): 5 (random, bipolar {-1, +1})
+- Noise added: 8 flipped bits (12.5%)
+
+**Observation**
+- Hamming(noisy, target) = 8
+- Hamming(recalled, target) = 0
+- Converged in 2 steps
+- Outcome: Perfect recall from a fairly noisy cue.
+
+**Interpretation**
+- With a small number of patterns, the network has well-separated “valleys” (attractors). Even a noisy cue sits in the basin of the correct memory and rolls downhill quickly.
+
+---
+
+## Experiment 2: Scale Up (8000 units, near capacity)
+- Units (D): 8000
+- Stored patterns (N): 900 (random)
+- Noise added: 800 flipped bits (10%)
+
+**Observation**
+- Hamming(noisy, target) = 800
+- Hamming(recalled, target) = 18 (not zero)
+- Converged in 6 steps
+- Outcome: Improved a lot but not perfect; recall failed by our strict criterion (exact match).
+
+**Interpretation**
+- Classic Hopfield capacity for random patterns ≈ 0.138 × D.
+  - For D = 8000 → ≈ 1104 patterns at the edge of reliability.
+  - N = 900 is close to this limit, so interference is strong.
+- The network still denoised from 800 errors down to 18—this is graceful degradation, not a cliff.
+- Likely ended in a spurious attractor (a blend state) or the correct basin but not deep enough to reach the exact stored vector.
+
+---
+
+## A Real-World Bug That Taught Me Something
+- I accidentally set `num_units = 8,000` (with a comma) which Python read as a tuple `(8, 0)`, breaking the run.
+- Lesson: Even tiny syntax issues can completely change meaning; always sanity-check shapes and types.
+
+---
+
+## What These Results Teach About Memory
+
+### 1) Distributed, content-addressable recall
+- You don’t need an index—partial/noisy content is enough to retrieve the memory.
+- The system finds the nearest attractor by iterative updates.
+
+### 2) Robustness vs interference is a core tradeoff
+- Fewer, more distinct patterns → robust recall.
+- More patterns (especially random/correlated) → interference and spurious attractors.
+
+### 3) Graceful degradation is a feature
+- Failure is often “close-but-not-exact,” which mirrors human memory (approximate, gist-based recall).
+
+### 4) Pattern statistics matter
+- Random patterns are worst-case.
+- Orthogonal or sparse patterns massively improve effective capacity.
+
+### 5) Biological parallels
+- Hippocampal “pattern separation” (e.g., dentate gyrus) reduces overlap among memories.
+- Capacity limits are real in brains; interference, confabulations, and blending align with spurious attractors.
+- Consolidation (falling to deeper valleys) and rehearsal map onto energy descent dynamics.
+
+---
+
+## How the Model Works (from first principles)
+
+- Representation: Each memory is a length-D vector with bipolar entries {-1, +1}. Binary {0,1} can be mapped via 0→−1, 1→+1.
+- Training (Hebbian): For each stored pattern p, add `p p^T` to the weight matrix; zero the diagonal; average across patterns. Intuition: co-active bits strengthen connections.
+- Recall (dynamics): Start from the noisy cue and iteratively update state by sign of input:
+  - Synchronous: update all bits at once, `state = sign(W @ state)`.
+  - Asynchronous: update one bit at a time (more biologically plausible). 
+- Energy: `E = -1/2 * state^T W state` monotonically decreases; the system converges to local minima (attractors).
+
+---
+
+## Lessons Learned (so far)
+- Exact recall is easy when N ≪ 0.138×D; it gets progressively harder near capacity.
+- “Failure” can still be informative—ending within 18 bits of the target shows strong denoising.
+- Noise tolerance depends on both N and the structure of stored patterns.
+- Update scheme and initialization can change the path and final attractor.
+- Sanity-check types and shapes; large-scale runs amplify small mistakes.
+
+---
+
+## Why This Matters (beyond toy models)
+- Shows how memory can be keyless and robust to noise.
+- Illuminates unavoidable limits in distributed storage systems.
+- Connects to human memory phenomena: interference, false recall, category prototypes, and consolidation.
+- Inspires engineering tradeoffs: choose sparsity, modularity, or pattern preprocessing when you need higher capacity.
+
+---
+
+## Experiments I Want To Run Next
+- Capacity sweep: Fix D, vary N; measure exact recall rate and final Hamming distance; identify the “knee.”
+- Noise sweep: Fix N (well below capacity), vary noise; find the tolerance curve.
+- Pattern structure: Compare random vs orthogonal vs sparse; quantify capacity gains.
+- Dynamics: Compare synchronous vs asynchronous updates; measure steps to converge and error.
+- Modularity: Split patterns across multiple smaller Hopfield nets; test interference reduction.
+
+---
+
+## Minimal Glossary
+- Attractor: A stable state where updates stop changing the pattern.
+- Basin of attraction: Set of starting states that converge to the same attractor.
+- Spurious attractor: A stable state that is not one of the stored patterns (often a blend).
+- Hamming distance: Number of positions where two patterns differ.
+
+---
+
+## One-Line Summary
+From 64 units/5 patterns with perfect recall to 8000 units/900 patterns with near-capacity interference, I saw how associative memory excels at denoising yet hits principled limits—just like biological memory systems.
