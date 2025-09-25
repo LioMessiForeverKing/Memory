@@ -120,6 +120,17 @@ I wanted a hands-on way to understand memory systems: how recall works from nois
 - **900 patterns + 10% noise = partial recall** (18 bits wrong, not perfect)
 - The sweet spot is around 5-10% of capacity for robust, noise-tolerant recall
 
+### Complete Failure Case: When Everything Breaks Down
+**Experiment:** 500 patterns in 4000 units, 3000 noise flips (75% corruption)
+**Result:** 3000 → 3994 wrong bits (99.85% wrong!) - complete failure
+**Why it failed:** Hit both capacity limit (90% of theoretical max) AND massive noise overload (75% corruption) simultaneously
+
+**Follow-up:** 390 patterns in 4000 units, 1460 noise flips (36.5% corruption)
+**Result:** 1460 → 1605 wrong bits - still failed, but less catastrophically
+**Why:** Still near capacity (390/552 = 70%) with high noise - the network converged to a spurious attractor
+
+**Key insight:** Memory systems have **both** capacity limits AND noise tolerance limits. When you hit both at once, the system breaks down completely and produces worse-than-random results.
+
 ## Experiments I Want To Run Next
 - Capacity sweep: Fix D, vary N; measure exact recall rate and final Hamming distance; identify the "knee."
 - Noise sweep: Fix N (well below capacity), vary noise; find the tolerance curve.

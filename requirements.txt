@@ -4,3 +4,4 @@ matplotlib>=3.8
 jupyter>=1.0
 notebook>=7.0
 pytest>=8.0
+mmh3>=4.1.0

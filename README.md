@@ -18,7 +18,7 @@ Current Focus: Hopfield Networks
 - Pattern structure: Random vs orthogonal vs sparse—which stores better?
 - Update dynamics: Sync vs async—different convergence paths?
 
-**Current status:** Basic Hopfield implementation working. Next: Bloom filters, then cache simulators.
+**Current status:** Hopfield implementation working. Bloom filters in progress (FPR experiments next), then cache simulators.
 
 **Learning Journal:** [Hopfield Networks](journal/hopfield_networks.md) - Detailed notes on experiments, failures, and biology connections
 
@@ -38,5 +38,19 @@ Philosophy
 This isn't about building production systems—it's about understanding memory through code. Each algorithm reveals different aspects: associative recall (Hopfield), probabilistic membership (Bloom), resource constraints (caches), learning schedules (spaced repetition).
 
 The goal is to build intuition about how memory works by breaking it.
+
+
+Next Memory Fields
+------------------
+
+- **Bloom Filters (Probabilistic Membership)**: Answer "have I seen this before?" using tiny memory with a controlled false-positive rate (no false negatives). Teaches space–accuracy tradeoffs and hash design. Used in databases, caches, and networking.
+
+- **Cache Replacement (LRU/LFU/ARC)**: Decide "what should I forget when space runs out?" under changing access patterns. Reveals forgetting strategies and workload effects. Mirrors OS, CPU, and browser caches.
+
+- **Spaced Repetition (SM-2/Anki variants)**: Optimize "when to review so I remember long-term?" Connects models of forgetting to scheduling. Practical for human learning; compare retention vs review load.
+
+- **Neural Memory Networks (DNC, Memory Networks)**: Give neural nets persistent, differentiable, addressable memory. Explore read/write heads, controllers, and training stability. Useful for reasoning and long-range dependencies.
+
+- **Associative Memory via Attention (Transformers)**: Show how attention acts like content-addressable memory without explicit storage. Study scaling, context windows, and emergent memory limits in modern models.
 
 
